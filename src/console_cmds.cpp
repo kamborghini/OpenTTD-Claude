@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "core/string_consumer.hpp"
 #include "console_internal.h"
+#include "claude/claude_advisor.h"
 #include "debug.h"
 #include "engine_func.h"
 #include "landscape.h"
@@ -2964,6 +2965,27 @@ static bool ConDumpInfo(std::span<std::string_view> argv)
 }
 
 /** Console command registration. */
+/**
+ * Ask Claude, the in-game strategy advisor, a question. With no arguments it just opens the window.
+ */
+static bool ConClaude(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Ask Claude, the in-game strategy advisor, about your transport company. Usage: 'claude <your question>'. With no question it just opens the Claude Advisor window.");
+		return true;
+	}
+
+	std::string question;
+	for (size_t i = 1; i < argv.size(); i++) {
+		if (i > 1) question += ' ';
+		question.append(argv[i]);
+	}
+
+	ShowClaudeAdvisorWindow(question);
+	if (!question.empty()) IConsolePrint(CC_DEFAULT, "Sent to Claude. The answer will appear in the Claude Advisor window.");
+	return true;
+}
+
 void IConsoleStdLibRegister()
 {
 	IConsole::CmdRegister("debug_level",             ConDebugLevel);
@@ -2974,6 +2996,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("exit",                    ConExit);
 	IConsole::CmdRegister("part",                    ConPart);
 	IConsole::CmdRegister("help",                    ConHelp);
+	IConsole::CmdRegister("claude",                  ConClaude);
 	IConsole::CmdRegister("info_cmd",                ConInfoCmd);
 	IConsole::CmdRegister("list_cmds",               ConListCommands);
 	IConsole::CmdRegister("list_aliases",            ConListAliases);

@@ -743,6 +743,12 @@ enum class WindowClass : uint16_t {
 	 */
 	Help,
 
+	/**
+	 * Claude AI advisor chat window; %Window numbers:
+	 *   - 0 = #ClaudeAdvisorWidgets
+	 */
+	ClaudeAdvisor,
+
 	Invalid = 0xFFFF, ///< Invalid window.
 };
 
