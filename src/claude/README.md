@@ -1,44 +1,64 @@
-# Claude in-game advisor
+# Claude Prompt Sandbox
 
-Adds **Claude**, an AI strategy advisor, directly into OpenTTD. Ask it questions about
-your transport company and it answers using a snapshot of your *current* game (year,
-cash, loan, company value, performance rating, fleet counts, stations, towns).
+A learn-to-prompt game mode inside OpenTTD. Instead of clicking to build, you **write prompts**.
+Claude scores how well you prompted and then carries your prompt out in the game — the clearer
+and more specific the prompt, the better the result.
 
-## How to use
+## How to play
 
-- Open the in-game console (press the <kbd>`</kbd> / <kbd>~</kbd> key) and type:
-  - `claude` — opens the **Claude Advisor** window.
-  - `claude why is my train losing money?` — opens the window and asks the question.
-- Type follow-up questions in the window's input box and press <kbd>Enter</kbd> or click **Ask**.
+1. Start a new game (so you control a company).
+2. Open the in-game console with the <kbd>`</kbd> / <kbd>~</kbd> key and type `claude` to open the
+   **Claude Prompt Sandbox** window (or `claude <your prompt>` to open it and run a prompt at once).
+3. In the window:
+   - Type a prompt and click **Run**. Claude returns a **prompt-quality score** (clarity, specificity,
+     constraints) with a coaching tip, then performs **real in-game actions**. A vague prompt scores low
+     and does little; a specific one with a clear goal, named towns and amounts scores high and does more.
+   - **Improve my prompt** — Claude critiques your draft and rewrites it better (no actions taken).
+   - **Suggest a prompt** — Claude proposes a strong example prompt for your current game.
+
+Prompt quality also applies a visible cash **efficiency bonus/penalty**, so better prompting literally pays off.
+
+## Actions Claude can take (current vocabulary)
+
+Town development & economy (executed via OpenTTD's command system, on the main thread):
+
+- Advertise a town (small / medium / large)
+- Fund new buildings in a town (rapid growth)
+- Build a statue in a town
+- Plant trees around a town
+- Take / repay a loan (by amount)
+- Rename the company / president
+- Found a new town (if enabled in this game)
+
+Transport construction (bus/rail lines, vehicle routing) is the planned next step.
 
 ## Configuration (environment variables)
 
-The advisor talks to the Anthropic Messages API, so it needs an API key. Set these
-before launching OpenTTD:
+Claude is reached through the Anthropic Messages API, so set your key before launching OpenTTD:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
 | `ANTHROPIC_API_KEY` | **yes** | – | Your Anthropic API key (`sk-ant-...`). |
-| `ANTHROPIC_MODEL` | no | `claude-sonnet-4-6` | Model id. Use `claude-haiku-4-5-20251001` for faster/cheaper replies. |
-| `ANTHROPIC_BASE_URL` | no | `https://api.anthropic.com` | API base URL (for proxies/gateways). |
-
-Example:
+| `ANTHROPIC_MODEL` | no | `claude-sonnet-4-6` | Model id (`claude-haiku-4-5-20251001` is faster/cheaper). |
+| `ANTHROPIC_BASE_URL` | no | `https://api.anthropic.com` | API base URL. |
 
 ```sh
 export ANTHROPIC_API_KEY="sk-ant-..."
 ./openttd
 ```
 
-If no key is set, the window explains how to configure one — the game still runs normally.
+Without a key the sandbox window still opens and explains how to configure one.
 
-## Implementation notes
+## How it works / implementation notes
 
-- `claude_advisor.{h,cpp}` — everything lives here. No other engine behaviour is changed.
-- The HTTP request runs on a **background thread** (libcurl, already a dependency) so the
-  game never freezes while waiting for a reply. Results are handed back to the main thread
-  and shown in the window via `OnRealtimeTick`.
+- **`claude_advisor.{h,cpp}`** holds the whole feature. Claude is asked for **strict JSON**:
+  `{ reply, score{overall,clarity,specificity,constraints,feedback}, actions[] }`.
+- The HTTP call runs on a **background thread** (libcurl) so the game never freezes. The reply is
+  handed to the **main thread**, which parses the action plan and executes each action through
+  `Command<Commands::…>::Post(...)`, then applies the prompt-quality cash bonus. Game state is only
+  ever touched on the main thread (`OnRealtimeTick`).
 - JSON is built/parsed with the bundled `nlohmann/json`.
-- Touch points in the rest of the engine are intentionally minimal: one `WindowClass`
-  enum value (`src/window_type.h`), one console command (`src/console_cmds.cpp`), two GUI
-  strings (`src/lang/english.txt`), and the build wiring (`src/claude/CMakeLists.txt`,
-  `src/CMakeLists.txt`).
+- `claudeexec` is a console command that runs a small canned plan to verify action execution
+  without calling the API (development aid).
+- Engine touch points stay minimal: one `WindowClass` value, two console commands, four GUI strings,
+  and the CMake wiring.

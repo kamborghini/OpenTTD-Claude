@@ -19,4 +19,11 @@
  */
 void ShowClaudeAdvisorWindow(const std::string &question = "");
 
+/**
+ * Test helper: run a small canned action plan against the current game and return a per-action log.
+ * Used by the 'claudeexec' console command to verify action execution without calling the API.
+ * Main thread only.
+ */
+std::string ClaudeRunSelfTest();
+
 #endif /* CLAUDE_ADVISOR_H */

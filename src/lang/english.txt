@@ -6050,5 +6050,7 @@ STR_BADGE_CONFIG_FILTERS                                        :{WHITE}Badge Fi
 STR_BADGE_CONFIG_PREVIEW                                        :Preview Image
 STR_BADGE_CONFIG_NAME                                           :Name
 STR_BADGE_FILTER_ANY_LABEL                                      :Any {STRING}
-STR_CLAUDE_ADVISOR_CAPTION                                      :{WHITE}Claude Advisor
-STR_CLAUDE_ADVISOR_SEND                                         :{BLACK}Ask
+STR_CLAUDE_SANDBOX_CAPTION                                      :{WHITE}Claude Prompt Sandbox
+STR_CLAUDE_SANDBOX_RUN                                          :{BLACK}Run
+STR_CLAUDE_SANDBOX_IMPROVE                                      :{BLACK}Improve my prompt
+STR_CLAUDE_SANDBOX_SUGGEST                                      :{BLACK}Suggest a prompt

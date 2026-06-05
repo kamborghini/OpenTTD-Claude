@@ -2982,7 +2982,22 @@ static bool ConClaude(std::span<std::string_view> argv)
 	}
 
 	ShowClaudeAdvisorWindow(question);
-	if (!question.empty()) IConsolePrint(CC_DEFAULT, "Sent to Claude. The answer will appear in the Claude Advisor window.");
+	if (!question.empty()) IConsolePrint(CC_DEFAULT, "Sent to Claude - see the Claude Prompt Sandbox window.");
+	return true;
+}
+
+/**
+ * Run a canned Claude action plan for testing (no API call). Verifies that prompt-driven actions execute.
+ */
+static bool ConClaudeExec(std::span<std::string_view> argv)
+{
+	if (argv.empty()) {
+		IConsolePrint(CC_HELP, "Run a canned Claude action plan (rename, loan, advertise, fund, trees) to test that prompt-driven actions work. Usage: 'claudeexec'.");
+		return true;
+	}
+	std::string result = ClaudeRunSelfTest();
+	IConsolePrint(CC_DEFAULT, "Claude self-test result:\n" + result);
+	Debug(misc, 0, "claudeexec result:\n{}", result);
 	return true;
 }
 
@@ -2997,6 +3012,7 @@ void IConsoleStdLibRegister()
 	IConsole::CmdRegister("part",                    ConPart);
 	IConsole::CmdRegister("help",                    ConHelp);
 	IConsole::CmdRegister("claude",                  ConClaude);
+	IConsole::CmdRegister("claudeexec",              ConClaudeExec);
 	IConsole::CmdRegister("info_cmd",                ConInfoCmd);
 	IConsole::CmdRegister("list_cmds",               ConListCommands);
 	IConsole::CmdRegister("list_aliases",            ConListAliases);
